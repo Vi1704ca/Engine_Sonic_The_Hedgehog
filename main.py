@@ -54,23 +54,25 @@ class Player():
         self.look_up = False
         self.go_LEFT = False
         self.go_RIGHT = False
-        self.dashing = False  # Новый флаг состояния рывка
+        self.dashing = False 
         self.dash_cooldown = 0
-        self.dash_delay_ms = 1000  # Задержка между рывками (мс)
+        self.dash_delay_ms = 1000  
         self.speed = speed
-        self.dash_speed = 30  # Скорость рывка
-        self.dash_duration = 20  # Количество кадров рывка
-        self.dash_frames_remaining = 0  # Счётчик кадров рывка
+        self.dash_speed = 30  
+        self.dash_duration = 20  
+        self.dash_frames_remaining = 0  
         self.on_Ground = False
         self.jump_count = 0
         self.jump_cooldown = 0
         self.jump_delay_ms = 500
+        self.left_side = False
+        self.right_side = True
+        self.animation_count= 0
 
     def draw_player(self):
         pg.draw.rect(c.display, (0, 250, 25), camera.apply(self.hitbox))
 
     def start_dash(self):
-        """Инициализация рывка, если он доступен."""
         current_time = pg.time.get_ticks()
         if current_time > self.dash_cooldown and self.dash_frames_remaining == 0:
             self.dashing = True
@@ -81,8 +83,12 @@ class Player():
         current_time = pg.time.get_ticks()
         keys = pg.key.get_pressed()
 
-        # Логика прыжка
-        if self.go_jump and self.on_Ground:
+        if keys[pg.K_DOWN] and (keys[pg.K_a] or keys[pg.K_s]):
+            self.dashing = True
+            self.start_dash()
+            
+
+        if self.go_jump and self.on_Ground and self.dashing == False:
             if current_time > self.jump_cooldown:
                 self.jump_cooldown = current_time + self.jump_delay_ms
                 self.jump_count = 10
@@ -92,25 +98,23 @@ class Player():
             self.hitbox.y -= self.speed + 35
             self.jump_count -= 1
 
-        # Логика рывка
-        if keys[pg.K_DOWN] and (keys[pg.K_a] or keys[pg.K_s]):
-            self.start_dash()
-
         if self.dashing and self.dash_frames_remaining > 0:
-            if keys[pg.K_a]:  
+            if self.left_side:  
+                self.dashing = True
                 self.hitbox.x -= self.dash_speed
-            elif keys[pg.K_s]:  
+            elif self.right_side:  
+                self.dashing = True
                 self.hitbox.x += self.dash_speed
             self.dash_frames_remaining -= 1
         else:
             self.dashing = False  
 
         if not self.dashing:
-            if keys[pg.K_LEFT]:
+            if self.go_LEFT:
                 if self.hitbox.x - 15 >= 0:
                     self.hitbox.x -= self.speed
 
-            if keys[pg.K_RIGHT]:
+            if self.go_RIGHT:
                 if self.hitbox.x + self.hitbox.width <= 3000:
                     self.hitbox.x += self.speed
 
@@ -165,15 +169,19 @@ while c.game_active:
             if i.key == pg.K_ESCAPE:
                 c.game_active = False
 
-            if i.key == pg.K_a or i.key == pg.K_s:
+            if (i.key == pg.K_a or i.key == pg.K_s):
                 cube.go_jump = 0
             if i.key == pg.K_RIGHT:
+                cube.left_side = False
+                cube.right_side = True
                 cube.go_RIGHT = 0
             if i.key == pg.K_DOWN:
                 cube.look_down = 0
                 key_down_start_time = None 
                 key_held_for_duration = False
             if i.key == pg.K_LEFT:
+                cube.left_side = True
+                cube.right_side = False
                 cube.go_LEFT = 0
             if i.key == pg.K_UP:
                 cube.look_up = 0
@@ -182,7 +190,7 @@ while c.game_active:
 
 
         if i.type == pg.KEYDOWN:
-            if (i.key == pg.K_a or i.key == pg.K_s) and cube.dashing == True:
+            if (i.key == pg.K_a or i.key == pg.K_s) and not cube.dashing:
                 cube.go_jump = 1
             if i.key == pg.K_RIGHT:
                 cube.go_RIGHT = 1
@@ -194,12 +202,12 @@ while c.game_active:
                 key_up_start_time = pg.time.get_ticks()   
 
 
-    if key_up_start_time is not None:
+    if key_up_start_time is not None and cube.dashing == False:
         elapsed_time = (pg.time.get_ticks() - key_up_start_time) / 1000  
         if elapsed_time >= key_up_duration and not key_held_for_duration:
             key_held_for_duration = True 
             cube.look_up = 1
-    elif key_down_start_time is not None:
+    elif key_down_start_time is not None and cube.dashing == False:
         elapsed_time = (pg.time.get_ticks() - key_down_start_time) / 1000  
         if elapsed_time >= key_down_duration and not key_held_for_duration:
             key_held_for_duration = True 
