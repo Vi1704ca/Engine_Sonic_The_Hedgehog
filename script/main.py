@@ -1,0 +1,110 @@
+import pygame as pg
+import os
+from settings import *
+from player import *
+from camera import *
+from platform import *
+from objective import *
+import time
+
+pg.init()
+
+class Config():
+    def __init__(self):
+        self.clock = pg.time.Clock()
+        self.camera_group = pg.sprite.Sprite()
+        self.display = pg.display.set_mode((WIDGHT, HEIGHT))
+        self.directory = os.path.dirname(__file__) 
+        self.path_d = os.path.abspath(os.path.join(self.directory, os.pardir))
+        self.game_active = True 
+        self.title_w = pg.display.set_caption("Sonic Engine")    
+        self.start_time = time.time()        
+
+c = Config()
+
+
+while c.game_active: 
+
+    c.display.fill((0, 0, 0))
+
+    cube.on_Ground = False
+
+    if plata.hitbox.colliderect(cube.hitbox):
+        cube.on_Ground = True
+        if cube.hitbox.right >= plata.hitbox.left and cube.hitbox.right <= plata.hitbox.left + cube.speed:
+            cube.hitbox.right = plata.hitbox.left
+        if cube.hitbox.left <= plata.hitbox.right and cube.hitbox.left >= plata.hitbox.right - cube.speed:
+            cube.hitbox.left = plata.hitbox.right                    
+        if cube.hitbox.top <= plata.hitbox.bottom and cube.hitbox.top >= plata.hitbox.bottom - cube.speed:
+            cube.hitbox.top = plata.hitbox.bottom                    
+        if cube.hitbox.bottom >= plata.hitbox.top and cube.hitbox.bottom <= plata.hitbox.top + cube.speed:
+            cube.hitbox.bottom = plata.hitbox.top
+
+    elapsed_time = int(time.time() - c.start_time)
+    fps = c.clock.get_fps()
+
+    camera.update(cube, cube.look_up, cube.look_down)
+    cube.draw_player(c.display)
+    plata.draw_platform(c.display)
+    cube.checker_pos()
+    display_time(elapsed_time, c.display)
+    display_fps(int(fps), c.display)
+    draw_obj(c.display)
+    
+
+    for i in pg.event.get():
+        if i.type == pg.QUIT:
+             c.game_active = False
+        
+        if i.type == pg.KEYUP:
+            if i.key == pg.K_ESCAPE:
+                c.game_active = False
+
+            if (i.key == pg.K_a or i.key == pg.K_s):
+                cube.go_jump = 0
+            if i.key == pg.K_RIGHT:
+                cube.left_side = False
+                cube.right_side = True
+                cube.go_RIGHT = 0
+            if i.key == pg.K_DOWN:
+                cube.look_down = 0
+                key_down_start_time = None 
+                key_held_for_duration = False
+            if i.key == pg.K_LEFT:
+                cube.left_side = True
+                cube.right_side = False
+                cube.go_LEFT = 0
+            if i.key == pg.K_UP:
+                cube.look_up = 0
+                key_up_start_time = None 
+                key_held_for_duration = False
+
+
+        if i.type == pg.KEYDOWN:
+            if (i.key == pg.K_a or i.key == pg.K_s) and not cube.dashing:
+                cube.go_jump = 1
+            if i.key == pg.K_RIGHT:
+                cube.go_RIGHT = 1
+            if i.key == pg.K_DOWN and key_down_start_time is None:  
+                key_down_start_time = pg.time.get_ticks()
+            if i.key == pg.K_LEFT:
+                cube.go_LEFT = 1
+            if i.key == pg.K_UP and key_up_start_time is None:  
+                key_up_start_time = pg.time.get_ticks()   
+
+
+    if key_up_start_time is not None and cube.dashing == False:
+        elapsed_time = (pg.time.get_ticks() - key_up_start_time) / 1000  
+        if elapsed_time >= key_up_duration and not key_held_for_duration:
+            key_held_for_duration = True 
+            cube.look_up = 1
+
+    elif key_down_start_time is not None and cube.dashing == False:
+        elapsed_time = (pg.time.get_ticks() - key_down_start_time) / 1000  
+        if elapsed_time >= key_down_duration and not key_held_for_duration:
+            key_held_for_duration = True 
+            cube.look_down = 1
+
+    pg.display.flip()
+    c.clock.tick(60)
+pg.quit()

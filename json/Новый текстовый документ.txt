@@ -1,0 +1,6 @@
+{
+    "sprites": {
+        "run_R": "run_2.png"
+
+    }
+}

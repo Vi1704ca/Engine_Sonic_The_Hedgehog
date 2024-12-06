@@ -1,0 +1,12 @@
+{
+    "Sprites": {
+        "turn_L": "/sonic/stay_left.png",
+        "turn_R": "/sonic/sonic-removebg-preview.png",
+        "run_R": "/sonic/run_2.png"
+
+    },
+
+    "Fonts": {
+        "main": "/font/soniclogo_jp.ttf"
+    }
+}
