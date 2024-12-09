@@ -2,6 +2,7 @@
     "Sprites": {
         "turn_L": "/sonic/stay_left.png",
         "turn_R": "/sonic/sonic-removebg-preview.png",
+        "jump": "/sonic/jump_3.png",
         "run_R": "/sonic/run_2.png"
 
     },

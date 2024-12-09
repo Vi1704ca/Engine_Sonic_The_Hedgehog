@@ -35,16 +35,19 @@ class Player(pg.sprite.Sprite):
 
         self.sprites = {
             "0" : pg.image.load(PATH_D + links["Sprites"]["turn_R"]),
-            "1" : pg.image.load(PATH_D + links["Sprites"]["turn_L"])
+            "1" : pg.image.load(PATH_D + links["Sprites"]["turn_L"]),
+            "3" : pg.image.load(PATH_D + links["Sprites"]["jump"])
         }
 
+        self.jump = pg.transform.scale(self.sprites["3"], (self.SIZE_S, self.SIZE_S))
+        self.turn_l = pg.transform.scale(self.sprites["1"], (self.SIZE_S, self.SIZE_S))
+        self.turn_r = pg.transform.scale(self.sprites["0"], (self.SIZE_S, self.SIZE_S))
 
-        self.sprite = pg.transform.scale(self.sprites["1"], (self.SIZE_S, self.SIZE_S))
-        self.sprite = pg.transform.scale(self.sprites["0"], (self.SIZE_S, self.SIZE_S))
+        self.sprite_now = self.turn_r
 
     def draw_player(self, screen):
-        pg.draw.rect(screen, (0, 250, 25), camera.apply(self.hitbox))
-        screen.blit(self.sprite, camera.apply(self.hitbox))
+        #pg.draw.rect(screen, (0, 250, 25), camera.apply(self.hitbox))
+        screen.blit(self.sprite_now, camera.apply(self.hitbox))
 
     def start_dash(self):
         current_time = pg.time.get_ticks()
@@ -67,6 +70,7 @@ class Player(pg.sprite.Sprite):
                 self.jump_cooldown = current_time + self.jump_delay_ms
                 self.jump_count = 10
                 self.on_Ground = False
+                self.sprite_now = self.jump
 
         if self.jump_count > 0:
             self.hitbox.y -= self.speed + 35
@@ -75,8 +79,10 @@ class Player(pg.sprite.Sprite):
         if self.dashing and self.dash_frames_remaining > 0:
             if self.left_side:  
                 self.dashing = True
+                self.sprite_now = self.jump
                 self.hitbox.x -= self.dash_speed
             elif self.right_side:  
+                self.sprite_now = self.jump
                 self.dashing = True
                 self.hitbox.x += self.dash_speed
             self.dash_frames_remaining -= 1
@@ -86,16 +92,25 @@ class Player(pg.sprite.Sprite):
         if not self.dashing:
             if self.go_LEFT:
                 if self.hitbox.x - 15 >= 0:
-                    self.sprite = pg.transform.scale(self.sprites["1"], (self.SIZE_S, self.SIZE_S))
+                    self.sprite_now = self.turn_l
                     self.hitbox.x -= self.speed
+                    self.left_side, self.right_side = True, False
 
             if self.go_RIGHT:
                 if self.hitbox.x + self.hitbox.width <= 3000:
-                    self.sprite = pg.transform.scale(self.sprites["0"], (self.SIZE_S, self.SIZE_S))
+                    self.sprite_now = self.turn_r
                     self.hitbox.x += self.speed
+                    self.left_side, self.right_side = False, True
 
-        if not self.on_Ground:
+        if self.on_Ground == False:
             self.hitbox.y += self.speed
+        else:
+            if not self.dashing:
+                if self.right_side:
+                    self.sprite_now = self.turn_r
+                elif self.left_side:
+                    self.sprite_now = self.turn_l
+
 
         self.hitbox.x = max(0, min(3000 - self.hitbox.width, self.hitbox.x))
         self.hitbox.y = max(0, self.hitbox.y)
