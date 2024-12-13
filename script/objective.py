@@ -1,5 +1,5 @@
 import pygame as pg
-from settings import FONT_SIZE, PATH_D, rings, score, WIDGHT
+from settings import FONT_SIZE, PATH_D, rings, score, WIDGHT_FULL
 import json as js
 import time
 
@@ -38,7 +38,7 @@ def draw_obj(screen):
         Text(f"Score: {score}", (10, 20)),
         Text(f"Time: {time_value}", (10, 100)),
         Text(f"Rings: {rings}", (10, 180)),
-        Text(f"FPS: {fps_text}", (WIDGHT - 250, 20))
+        Text(f"FPS: {fps_text}", (WIDGHT_FULL - 250, 20))
     ]
 
     for text in text_objects:

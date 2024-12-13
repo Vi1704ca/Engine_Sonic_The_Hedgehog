@@ -44,6 +44,10 @@ class Player(pg.sprite.Sprite):
         self.turn_r = pg.transform.scale(self.sprites["0"], (self.SIZE_S, self.SIZE_S))
 
         self.sprite_now = self.turn_r
+        self.sprite_now = self.jump
+
+        self.in_air = False
+        self.tick_air = 0
 
     def draw_player(self, screen):
         #pg.draw.rect(screen, (0, 250, 25), camera.apply(self.hitbox))
@@ -105,14 +109,18 @@ class Player(pg.sprite.Sprite):
         if self.on_Ground == False:
             self.hitbox.y += self.speed
         else:
-            if not self.dashing:
+            if not self.dashing and self.on_Ground:
                 if self.right_side:
                     self.sprite_now = self.turn_r
                 elif self.left_side:
                     self.sprite_now = self.turn_l
 
+        if self.in_air == True:
+            self.sprite_now = self.jump
+
 
         self.hitbox.x = max(0, min(3000 - self.hitbox.width, self.hitbox.x))
         self.hitbox.y = max(0, self.hitbox.y)
+
 
 cube = Player(500, 500, 10)

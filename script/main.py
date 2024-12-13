@@ -13,24 +13,27 @@ class Config():
     def __init__(self):
         self.clock = pg.time.Clock()
         self.camera_group = pg.sprite.Sprite()
-        self.display = pg.display.set_mode((WIDGHT, HEIGHT))
+        self.display = pg.display.set_mode((WIDGHT_FULL, HEIGHT_FULL), pg.SCALED)
         self.directory = os.path.dirname(__file__) 
         self.path_d = os.path.abspath(os.path.join(self.directory, os.pardir))
         self.game_active = True 
         self.title_w = pg.display.set_caption("Sonic Engine")    
-        self.start_time = time.time()        
+        self.start_time = time.time()      
+        self.full_screen = False  
 
 c = Config()
 
+gravity = False
 
 while c.game_active: 
 
     c.display.fill((0, 0, 0))
 
-    cube.on_Ground = False
 
     if plata.hitbox.colliderect(cube.hitbox):
         cube.on_Ground = True
+        cube.tick_air = 0
+        cube.in_air = False
         if cube.hitbox.right >= plata.hitbox.left and cube.hitbox.right <= plata.hitbox.left + cube.speed:
             cube.hitbox.right = plata.hitbox.left
         if cube.hitbox.left <= plata.hitbox.right and cube.hitbox.left >= plata.hitbox.right - cube.speed:
@@ -39,6 +42,16 @@ while c.game_active:
             cube.hitbox.top = plata.hitbox.bottom                    
         if cube.hitbox.bottom >= plata.hitbox.top and cube.hitbox.bottom <= plata.hitbox.top + cube.speed:
             cube.hitbox.bottom = plata.hitbox.top
+
+    else: 
+        cube.on_Ground = False
+
+    if cube.on_Ground == False:
+        cube.tick_air += 1
+    
+    if cube.tick_air >= 3:
+        cube.in_air = True
+        
 
     elapsed_time = int(time.time() - c.start_time)
     fps = c.clock.get_fps()
@@ -78,6 +91,7 @@ while c.game_active:
                 cube.look_up = 0
                 key_up_start_time = None 
                 key_held_for_duration = False
+            
 
 
         if i.type == pg.KEYDOWN:
@@ -104,6 +118,7 @@ while c.game_active:
         if elapsed_time >= key_down_duration and not key_held_for_duration:
             key_held_for_duration = True 
             cube.look_down = 1
+
 
     pg.display.flip()
     c.clock.tick(60)

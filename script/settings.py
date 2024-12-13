@@ -3,13 +3,16 @@ import os
 
 user32 = ctypes.windll.user32
 
-WIDGHT = user32.GetSystemMetrics(0)
-HEIGHT = user32.GetSystemMetrics(1)
+WIDGHT_FULL = user32.GetSystemMetrics(0)
+HEIGHT_FULL = user32.GetSystemMetrics(1)
+WIDGHT, HEIGHT = 1040, 800
+
+WIDGHT_NOW, HEIGHT_NOW = WIDGHT, HEIGHT
 
 
 DIRECTORY = os.path.dirname(__file__) 
 PATH_D = os.path.abspath(os.path.join(DIRECTORY, os.pardir))
-#WIDGHT, HEIGHT = 1040, 800
+
 
 key_held_for_duration = False  
 key_up_start_time = None 
