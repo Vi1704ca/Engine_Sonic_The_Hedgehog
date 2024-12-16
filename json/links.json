@@ -4,6 +4,10 @@
         "turn_R": "/sonic/sonic-removebg-preview.png",
         "jump": "/sonic/jump_3.png",
         "dash": "/sonic/jump_3.png",
+        "look_up_l": "/sonic/up_left.png",
+        "look_down_l": "/sonic/down2_left.png",
+        "look_up_r": "/sonic/up_right.png",
+        "look_down_r": "/sonic/down_right.png",
         "run_R": "/sonic/run_2.png"
 
     },

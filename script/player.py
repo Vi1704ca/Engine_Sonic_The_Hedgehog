@@ -32,19 +32,28 @@ class Player(pg.sprite.Sprite):
         self.left_side = False
         self.right_side = True
         self.animation_count= 0
+        self.raise_head, self.lower_head = False, False
+
 
         self.sprites = {
             "0" : pg.image.load(PATH_D + links["Sprites"]["turn_R"]),
             "1" : pg.image.load(PATH_D + links["Sprites"]["turn_L"]),
-            "3" : pg.image.load(PATH_D + links["Sprites"]["jump"])
+            "3" : pg.image.load(PATH_D + links["Sprites"]["jump"]),
+            "2" : pg.image.load(PATH_D + links["Sprites"]["look_up_l"]),
+            "4" : pg.image.load(PATH_D + links["Sprites"]["look_down_l"]),
+            "5" : pg.image.load(PATH_D + links["Sprites"]["look_down_r"]),
+            "6" : pg.image.load(PATH_D + links["Sprites"]["look_up_r"]),
         }
 
         self.jump = pg.transform.scale(self.sprites["3"], (self.SIZE_S, self.SIZE_S))
         self.turn_l = pg.transform.scale(self.sprites["1"], (self.SIZE_S, self.SIZE_S))
         self.turn_r = pg.transform.scale(self.sprites["0"], (self.SIZE_S, self.SIZE_S))
+        self.l_up_L = pg.transform.scale(self.sprites["2"], (self.SIZE_S, self.SIZE_S))
+        self.l_down_L = pg.transform.scale(self.sprites["4"], (self.SIZE_S, self.SIZE_S))
+        self.l_up_R = pg.transform.scale(self.sprites["6"], (self.SIZE_S, self.SIZE_S))
+        self.l_down_R = pg.transform.scale(self.sprites["5"], (self.SIZE_S, self.SIZE_S))
 
         self.sprite_now = self.turn_r
-        self.sprite_now = self.jump
 
         self.in_air = False
         self.tick_air = 0
@@ -118,9 +127,22 @@ class Player(pg.sprite.Sprite):
         if self.in_air == True:
             self.sprite_now = self.jump
 
+        if not self.dashing:
+            if self.lower_head == True:
+                if self.right_side:
+                    self.sprite_now = self.l_down_R
+                elif self.left_side:
+                    self.sprite_now = self.l_down_L
+            elif self.raise_head == True:
+                if self.right_side:
+                    self.sprite_now = self.l_up_R
+                elif self.left_side:
+                    self.sprite_now = self.l_up_L
+
+
 
         self.hitbox.x = max(0, min(3000 - self.hitbox.width, self.hitbox.x))
         self.hitbox.y = max(0, self.hitbox.y)
 
 
-cube = Player(500, 500, 10)
+cube = Player(500, 100, 10)

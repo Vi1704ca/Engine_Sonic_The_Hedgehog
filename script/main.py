@@ -80,6 +80,7 @@ while c.game_active:
                 cube.right_side = True
                 cube.go_RIGHT = 0
             if i.key == pg.K_DOWN:
+                cube.lower_head = 0
                 cube.look_down = 0
                 key_down_start_time = None 
                 key_held_for_duration = False
@@ -88,6 +89,7 @@ while c.game_active:
                 cube.right_side = False
                 cube.go_LEFT = 0
             if i.key == pg.K_UP:
+                cube.raise_head = 0
                 cube.look_up = 0
                 key_up_start_time = None 
                 key_held_for_duration = False
@@ -100,10 +102,12 @@ while c.game_active:
             if i.key == pg.K_RIGHT:
                 cube.go_RIGHT = 1
             if i.key == pg.K_DOWN and key_down_start_time is None:  
+                cube.lower_head = 1
                 key_down_start_time = pg.time.get_ticks()
             if i.key == pg.K_LEFT:
                 cube.go_LEFT = 1
             if i.key == pg.K_UP and key_up_start_time is None:  
+                cube.raise_head = 1
                 key_up_start_time = pg.time.get_ticks()   
 
 
