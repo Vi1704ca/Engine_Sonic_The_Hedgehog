@@ -8,7 +8,8 @@
         "look_down_l": "/sonic/down2_left.png",
         "look_up_r": "/sonic/up_right.png",
         "look_down_r": "/sonic/down_right.png",
-        "run_R": "/sonic/run_2.png"
+        "run_R": "/sonic/run_2.png",
+        "run_L": "/sonic/run_LEFT.png"
 
     },
 

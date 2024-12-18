@@ -7,11 +7,12 @@ from settings import PATH_D
 with open(PATH_D + "/json/links.json", "r") as file:
        links = js.load(file)
 
+pg.init()
 
 class Player(pg.sprite.Sprite):
     def __init__(self, x, y, speed):
         self.x, self.y = x, y
-        self.SIZE_S = 60
+        self.SIZE_S = 50
         self.hitbox = pg.Rect(self.x, self.y, self.SIZE_S, self.SIZE_S)
         self.go_jump = False
         self.look_down = False
@@ -29,11 +30,14 @@ class Player(pg.sprite.Sprite):
         self.jump_count = 0
         self.jump_cooldown = 0
         self.jump_delay_ms = 500
-        self.left_side = False
-        self.right_side = True
-        self.animation_count= 0
+        self.left_side, self.right_side = False, True
         self.raise_head, self.lower_head = False, False
 
+        self.animation_count = 0
+        self.current_frame = 0
+        self.animation_speed = 5
+        self.total_frames = 19
+        self.num_frames_to_use = 5
 
         self.sprites = {
             "0" : pg.image.load(PATH_D + links["Sprites"]["turn_R"]),
@@ -45,6 +49,11 @@ class Player(pg.sprite.Sprite):
             "6" : pg.image.load(PATH_D + links["Sprites"]["look_up_r"]),
         }
 
+        self.sprite_animation = {
+            "right": pg.image.load(PATH_D + links["Sprites"]["run_R"]),
+            "left": pg.image.load(PATH_D + links["Sprites"]["run_L"]),
+        }
+
         self.jump = pg.transform.scale(self.sprites["3"], (self.SIZE_S, self.SIZE_S))
         self.turn_l = pg.transform.scale(self.sprites["1"], (self.SIZE_S, self.SIZE_S))
         self.turn_r = pg.transform.scale(self.sprites["0"], (self.SIZE_S, self.SIZE_S))
@@ -53,10 +62,40 @@ class Player(pg.sprite.Sprite):
         self.l_up_R = pg.transform.scale(self.sprites["6"], (self.SIZE_S, self.SIZE_S))
         self.l_down_R = pg.transform.scale(self.sprites["5"], (self.SIZE_S, self.SIZE_S))
 
-        self.sprite_now = self.turn_r
+        self.run_frames_right = self.load_run_frames(self.sprite_animation["right"], self.total_frames, self.num_frames_to_use)
+        self.run_frames_left = self.load_run_frames(self.sprite_animation["left"], self.total_frames, self.num_frames_to_use)
+
+        self.current_frames = self.run_frames_right
+        self.sprite_now = self.current_frames[0]
 
         self.in_air = False
         self.tick_air = 0
+        self.animation_count = 0
+        self.current_frame = 0
+        self.animation_speed = 10
+
+        self.left_side = False
+        self.right_side = True
+
+    def load_run_frames(self, spritesheet, total_frames, num_frames_to_use):
+        frames = []
+        sheet_width, sheet_height = spritesheet.get_size()
+        frame_width = sheet_width // total_frames
+
+        for i in range(num_frames_to_use):
+            if i < total_frames:
+                frame = spritesheet.subsurface((i * frame_width, 0, frame_width, sheet_height))
+                frame = pg.transform.scale(frame, (self.SIZE_S + 10, self.SIZE_S))
+                frames.append(frame)
+        return frames
+
+    def update_animation(self):
+        self.animation_count += 1
+        if self.animation_count >= self.animation_speed:
+            self.animation_count = 0
+            self.current_frame = (self.current_frame + 1) % len(self.current_frames)
+            self.sprite_now = self.current_frames[self.current_frame]
+
 
     def draw_player(self, screen):
         #pg.draw.rect(screen, (0, 250, 25), camera.apply(self.hitbox))
@@ -105,24 +144,37 @@ class Player(pg.sprite.Sprite):
         if not self.dashing:
             if self.go_LEFT:
                 if self.hitbox.x - 15 >= 0:
-                    self.sprite_now = self.turn_l
+                    #self.sprite_now = self.turn_l
                     self.hitbox.x -= self.speed
                     self.left_side, self.right_side = True, False
+                    self.current_frames = self.run_frames_left
+                    self.update_animation()
 
-            if self.go_RIGHT:
+            elif self.go_RIGHT:
                 if self.hitbox.x + self.hitbox.width <= 3000:
-                    self.sprite_now = self.turn_r
+                    #self.sprite_now = self.turn_r
                     self.hitbox.x += self.speed
                     self.left_side, self.right_side = False, True
+                    self.current_frames = self.run_frames_right
+                    self.update_animation()
+            else:
+                self.animation_count = 0
+                self.current_frame = 0
+                if self.left_side == False and self.right_side == True:
+                    self.sprite_now = self.turn_r
+
+                else:
+                    self.sprite_now = self.turn_l
 
         if self.on_Ground == False:
             self.hitbox.y += self.speed
         else:
-            if not self.dashing and self.on_Ground:
-                if self.right_side:
-                    self.sprite_now = self.turn_r
-                elif self.left_side:
-                    self.sprite_now = self.turn_l
+            pass
+            #f not self.dashing and self.on_Ground:
+            #   if self.right_side:
+            #       self.sprite_now = self.turn_r
+            #   elif self.left_side:
+            #       self.sprite_now = self.turn_l
 
         if self.in_air == True:
             self.sprite_now = self.jump
