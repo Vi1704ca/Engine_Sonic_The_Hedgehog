@@ -1,0 +1,7 @@
+-Make animation for jump
+-Make animation for sprin dash
+-Fix animation run
+-Make logic run and walk
+-Make logic run to vertical sides
+-Add Texture for all sprites
+

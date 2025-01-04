@@ -34,13 +34,13 @@ while c.game_active:
         cube.on_Ground = True
         cube.tick_air = 0
         cube.in_air = False
-        if cube.hitbox.right >= plata.hitbox.left and cube.hitbox.right <= plata.hitbox.left + cube.speed:
+        if cube.hitbox.right >= plata.hitbox.left and cube.hitbox.right <= plata.hitbox.left + cube.speed_defualt:
             cube.hitbox.right = plata.hitbox.left
-        if cube.hitbox.left <= plata.hitbox.right and cube.hitbox.left >= plata.hitbox.right - cube.speed:
+        if cube.hitbox.left <= plata.hitbox.right and cube.hitbox.left >= plata.hitbox.right - cube.speed_defualt:
             cube.hitbox.left = plata.hitbox.right                    
-        if cube.hitbox.top <= plata.hitbox.bottom and cube.hitbox.top >= plata.hitbox.bottom - cube.speed:
+        if cube.hitbox.top <= plata.hitbox.bottom and cube.hitbox.top >= plata.hitbox.bottom - cube.speed_defualt:
             cube.hitbox.top = plata.hitbox.bottom                    
-        if cube.hitbox.bottom >= plata.hitbox.top and cube.hitbox.bottom <= plata.hitbox.top + cube.speed:
+        if cube.hitbox.bottom >= plata.hitbox.top and cube.hitbox.bottom <= plata.hitbox.top + cube.speed_defualt:
             cube.hitbox.bottom = plata.hitbox.top
 
     else: 
@@ -79,6 +79,8 @@ while c.game_active:
                 cube.left_side = False
                 cube.right_side = True
                 cube.go_RIGHT = 0
+                cube.touch_R_key = False
+                cube.touch_L_key = False
             if i.key == pg.K_DOWN:
                 cube.lower_head = 0
                 cube.look_down = 0
@@ -88,11 +90,15 @@ while c.game_active:
                 cube.left_side = True
                 cube.right_side = False
                 cube.go_LEFT = 0
+                cube.touch_R_key = False
+                cube.touch_L_key = False
             if i.key == pg.K_UP:
                 cube.raise_head = 0
                 cube.look_up = 0
                 key_up_start_time = None 
                 key_held_for_duration = False
+            if i.key == pg.K_x:
+                cube.brake = 0
             
 
 
@@ -100,16 +106,21 @@ while c.game_active:
             if (i.key == pg.K_a or i.key == pg.K_s) and not cube.dashing:
                 cube.go_jump = 1
             if i.key == pg.K_RIGHT:
+                cube.touch_R_key = True
+                cube.touch_L_key = False
                 cube.go_RIGHT = 1
             if i.key == pg.K_DOWN and key_down_start_time is None:  
                 cube.lower_head = 1
                 key_down_start_time = pg.time.get_ticks()
             if i.key == pg.K_LEFT:
+                cube.touch_R_key = False
+                cube.touch_L_key = True
                 cube.go_LEFT = 1
             if i.key == pg.K_UP and key_up_start_time is None:  
                 cube.raise_head = 1
                 key_up_start_time = pg.time.get_ticks()   
-
+            if i.key == pg.K_x:
+                cube.brake = 1
 
     if key_up_start_time is not None and cube.dashing == False:
         elapsed_time = (pg.time.get_ticks() - key_up_start_time) / 1000  

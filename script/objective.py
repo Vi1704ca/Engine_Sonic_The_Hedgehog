@@ -2,6 +2,7 @@ import pygame as pg
 from settings import FONT_SIZE, PATH_D, rings, score, WIDGHT_FULL
 import json as js
 import time
+from player import cube
 
 pg.init()
 
@@ -37,7 +38,7 @@ def draw_obj(screen):
     text_objects = [
         Text(f"Score: {score}", (10, 20)),
         Text(f"Time: {time_value}", (10, 100)),
-        Text(f"Rings: {rings}", (10, 180)),
+        Text(f"Speed: {int(cube.speed)}", (10, 180)),
         Text(f"FPS: {fps_text}", (WIDGHT_FULL - 250, 20))
     ]
 

@@ -10,8 +10,10 @@ with open(PATH_D + "/json/links.json", "r") as file:
 pg.init()
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, x, y, speed):
+    def __init__(self, x, y, speed, speed_defualt):
         self.x, self.y = x, y
+        self.speed = speed
+        self.speed_defualt = speed_defualt
         self.SIZE_S = 50
         self.hitbox = pg.Rect(self.x, self.y, self.SIZE_S, self.SIZE_S)
         self.go_jump = False
@@ -19,10 +21,17 @@ class Player(pg.sprite.Sprite):
         self.look_up = False
         self.go_LEFT = False
         self.go_RIGHT = False
+        self.count_run_walk = 0
+        self.run_lost_speed = False
+
+
+        self.touch_R_key = False
+        self.touch_L_key = False
+        self.brake = False
+
         self.dashing = False 
         self.dash_cooldown = 0
         self.dash_delay_ms = 1000  
-        self.speed = speed
         self.dash_speed = 30  
         self.dash_duration = 20  
         self.dash_frames_remaining = 0  
@@ -133,10 +142,12 @@ class Player(pg.sprite.Sprite):
                 self.dashing = True
                 self.sprite_now = self.jump
                 self.hitbox.x -= self.dash_speed
+                self.speed = 20
             elif self.right_side:  
                 self.sprite_now = self.jump
                 self.dashing = True
                 self.hitbox.x += self.dash_speed
+                self.speed = 20
             self.dash_frames_remaining -= 1
         else:
             self.dashing = False  
@@ -149,14 +160,16 @@ class Player(pg.sprite.Sprite):
                     self.left_side, self.right_side = True, False
                     self.current_frames = self.run_frames_left
                     self.update_animation()
+                    self.go_RIGHT = False
 
             elif self.go_RIGHT:
-                if self.hitbox.x + self.hitbox.width <= 3000:
+                if self.hitbox.x + self.hitbox.width <= 7000:
                     #self.sprite_now = self.turn_r
                     self.hitbox.x += self.speed
                     self.left_side, self.right_side = False, True
                     self.current_frames = self.run_frames_right
                     self.update_animation()
+                    self.go_LEFT = False
             else:
                 self.animation_count = 0
                 self.current_frame = 0
@@ -167,10 +180,10 @@ class Player(pg.sprite.Sprite):
                     self.sprite_now = self.turn_l
 
         if self.on_Ground == False:
-            self.hitbox.y += self.speed
+            self.hitbox.y += self.speed_defualt
         else:
             pass
-            #f not self.dashing and self.on_Ground:
+            #if not self.dashing and self.on_Ground:
             #   if self.right_side:
             #       self.sprite_now = self.turn_r
             #   elif self.left_side:
@@ -190,6 +203,40 @@ class Player(pg.sprite.Sprite):
                     self.sprite_now = self.l_up_R
                 elif self.left_side:
                     self.sprite_now = self.l_up_L
+            
+
+        if (self.touch_L_key or self.touch_R_key) and self.speed < 35:
+            self.speed += 0.05
+            if self.touch_R_key:
+                self.go_RIGHT = True
+                self.go_LEFT = False
+                self.right_side = True
+                self.left_side = False
+            elif self.touch_L_key:
+                self.go_LEFT = True
+                self.go_RIGHT = False
+                self.left_side = True
+                self.right_side = False
+
+        elif self.speed > 0 and not self.touch_L_key and not self.touch_R_key:
+            self.speed -= 0.05
+            if not self.dashing and self.on_Ground:
+                if self.right_side:
+                    self.go_RIGHT = True
+                    self.go_LEFT = False
+                elif self.left_side:
+                    self.go_LEFT = True
+                    self.go_RIGHT = False
+
+        if self.speed <= 0:
+            if not self.dashing and self.raise_head == False and self.lower_head == False and self.on_Ground:
+                if self.right_side:
+                    self.sprite_now = self.turn_r
+                elif self.left_side:
+                    self.sprite_now = self.turn_l
+
+        if self.brake and self.speed > 0:
+            self.speed -= 0.1
 
 
 
@@ -197,4 +244,4 @@ class Player(pg.sprite.Sprite):
         self.hitbox.y = max(0, self.hitbox.y)
 
 
-cube = Player(500, 100, 10)
+cube = Player(500, 100, 0, 8)
