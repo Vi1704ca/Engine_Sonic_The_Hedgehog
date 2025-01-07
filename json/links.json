@@ -9,7 +9,13 @@
         "look_up_r": "/sonic/up_right.png",
         "look_down_r": "/sonic/down_right.png",
         "run_R": "/sonic/run_2.png",
-        "run_L": "/sonic/run_LEFT.png"
+        "run_L": "/sonic/run_LEFT.png",
+        "walk_R": "/sonic/walk.png",
+        "walk_L": "/sonic/walk_left.png",
+        "stop_break": "/sonic/break.png",
+        "stop_break_L": "/sonic/break_left.png",
+        "dont_move_animation": "/sonic/dontmove.png",
+        "dont_move_animation_l": "/sonic/dontmove_LEFT.png"
 
     },
 

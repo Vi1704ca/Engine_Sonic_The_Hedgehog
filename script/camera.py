@@ -30,4 +30,4 @@ class Camera:
 
         self.offset_y += self.additional_offset_y
 
-camera = Camera(6000, 2000)
+camera = Camera(12000, 2000)
