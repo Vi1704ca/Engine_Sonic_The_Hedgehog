@@ -3,7 +3,7 @@ import os
 from settings import *
 from player import *
 from camera import *
-from platform import *
+from game_platform import *
 from objective import *
 import time
 
@@ -23,42 +23,64 @@ class Config():
 
 c = Config()
 
+platforms = generate_platforms()
+
 gravity = False
 
 while c.game_active: 
 
     c.display.fill((0, 0, 0))
 
+    for plata in platforms:
+        plata.draw_platform(c.display)
 
-    if plata.hitbox.colliderect(cube.hitbox):
-        cube.on_Ground = True
-        cube.tick_air = 0
-        cube.in_air = False
-        if cube.hitbox.right >= plata.hitbox.left and cube.hitbox.right <= plata.hitbox.left + cube.speed_defualt:
-            cube.hitbox.right = plata.hitbox.left
-        if cube.hitbox.left <= plata.hitbox.right and cube.hitbox.left >= plata.hitbox.right - cube.speed_defualt:
-            cube.hitbox.left = plata.hitbox.right                    
-        if cube.hitbox.top <= plata.hitbox.bottom and cube.hitbox.top >= plata.hitbox.bottom - cube.speed_defualt:
-            cube.hitbox.top = plata.hitbox.bottom                    
-        if cube.hitbox.bottom >= plata.hitbox.top and cube.hitbox.bottom <= plata.hitbox.top + cube.speed_defualt:
-            cube.hitbox.bottom = plata.hitbox.top
+    for plata in platforms:
+        if not plata.hitbox.colliderect(cube.hitbox):
+            cube.on_Ground = False
 
-    else: 
-        cube.on_Ground = False
+    for plata in platforms:
+        if plata.hitbox.colliderect(cube.hitbox):
+            cube.on_Ground = True
+            cube.tick_air = 0
+            cube.in_air = False
 
-    if cube.on_Ground == False:
+            if cube.hitbox.right >= plata.hitbox.left and cube.hitbox.left < plata.hitbox.left:
+                cube.hitbox.right = plata.hitbox.left
+                cube.velocity_x = 0  
+            if cube.hitbox.left <= plata.hitbox.right and cube.hitbox.right > plata.hitbox.right:
+                cube.hitbox.left = plata.hitbox.right
+                cube.velocity_x = 0
+            if cube.hitbox.bottom >= plata.hitbox.top and cube.hitbox.top < plata.hitbox.top:
+                cube.hitbox.bottom = plata.hitbox.top
+                cube.velocity_y = 0  
+                cube.on_Ground = True  
+            if cube.hitbox.top <= plata.hitbox.bottom and cube.hitbox.bottom > plata.hitbox.bottom:
+                cube.hitbox.top = plata.hitbox.bottom
+                cube.velocity_y = 0 
+            
+
+    steps = int(max(5, abs(cube.velocity_y) // 5))  
+    for step in range(steps):
+        cube.hitbox.y += cube.velocity_y / steps  
+        for plata in platforms:
+            if cube.hitbox.colliderect(plata.hitbox):  
+                cube.hitbox.bottom = plata.hitbox.top  
+                cube.velocity_y = 0
+                cube.on_Ground = True
+                break
+
+    if not cube.on_Ground:
         cube.tick_air += 1
-    
-    if cube.tick_air >= 3:
-        cube.in_air = True
-        
+        if cube.tick_air >= 3:
+            cube.in_air = True
+
 
     elapsed_time = int(time.time() - c.start_time)
     fps = c.clock.get_fps()
 
     camera.update(cube, cube.look_up, cube.look_down)
     cube.draw_player(c.display)
-    plata.draw_platform(c.display)
+    
     cube.checker_pos()
     display_time(elapsed_time, c.display)
     display_fps(int(fps), c.display)
@@ -122,13 +144,13 @@ while c.game_active:
             if i.key == pg.K_x:
                 cube.brake = 1
 
-    if key_up_start_time is not None and cube.dashing == False:
+    if key_up_start_time is not None and cube.dashing == False and cube.speed <= 0:
         elapsed_time = (pg.time.get_ticks() - key_up_start_time) / 1000  
         if elapsed_time >= key_up_duration and not key_held_for_duration:
             key_held_for_duration = True 
             cube.look_up = 1
 
-    elif key_down_start_time is not None and cube.dashing == False:
+    elif key_down_start_time is not None and cube.dashing == False and cube.speed <= 0:
         elapsed_time = (pg.time.get_ticks() - key_down_start_time) / 1000  
         if elapsed_time >= key_down_duration and not key_held_for_duration:
             key_held_for_duration = True 

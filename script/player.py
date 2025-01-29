@@ -1,3 +1,12 @@
+"""
+    #### All mechanics and logic of the player sonic:
+    - Logic run
+    - Animation character
+    - Logic of deat+
+
+"""
+
+
 import pygame as pg
 from camera import *
 import json as js
@@ -24,6 +33,8 @@ class Player(pg.sprite.Sprite):
         self.count_run_walk = 0
         self.run_lost_speed = False
 
+        self.velocity_x = 0
+        self.velocity_y = 0
 
         self.touch_R_key = False
         self.touch_L_key = False
@@ -146,15 +157,15 @@ class Player(pg.sprite.Sprite):
             self.hitbox.y -= self.speed_defualt + 35
             self.jump_count -= 1
 
-        if self.dashing and self.dash_frames_remaining > 0:
+        if self.dashing and self.dash_frames_remaining > 0 and self.speed <= 0:
             if self.left_side:
                 self.sprite_now = self.jump
                 self.hitbox.x -= self.dash_speed
-                self.speed = 20
+                self.speed = 25
             elif self.right_side:
                 self.sprite_now = self.jump
                 self.hitbox.x += self.dash_speed
-                self.speed = 20
+                self.speed = 25
             self.dash_frames_remaining -= 1
         else:
             self.dashing = False
@@ -250,11 +261,10 @@ class Player(pg.sprite.Sprite):
                 self.current_frames = self.idle_frames_R
             elif self.left_side:
                 self.current_frames = self.idle_frames_L
-
                     
 
         if self.brake and self.speed > 0:
-            self.speed -= 0.1
+            self.speed -= 0.5
             if self.speed >= 7:
                 if self.right_side:
                     self.sprite_now = self.stop_break_left
@@ -262,9 +272,13 @@ class Player(pg.sprite.Sprite):
                     self.sprite_now = self.stop_break
 
 
+        if self.hitbox.y >= 1200:   
+            self.hitbox.x = 500
+            self.hitbox.y = 500
 
-        self.hitbox.x = max(0, min(12000 - self.hitbox.width, self.hitbox.x))
+
+        self.hitbox.x = max(0, min(102000 - self.hitbox.width, self.hitbox.x))
         self.hitbox.y = max(0, self.hitbox.y)
 
 
-cube = Player(500, 100, 0, 8)
+cube = Player(500, 100, 0, 15)
