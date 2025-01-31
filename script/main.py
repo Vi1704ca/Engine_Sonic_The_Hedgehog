@@ -5,6 +5,7 @@ from player import *
 from camera import *
 from game_platform import *
 from objective import *
+from ring import *
 import time
 
 pg.init()
@@ -23,7 +24,8 @@ class Config():
 
 c = Config()
 
-platforms = generate_platforms()
+platforms, rings = generate_platforms_and_rings()
+rings_group.add(rings)
 
 gravity = False
 
@@ -33,6 +35,11 @@ while c.game_active:
 
     for plata in platforms:
         plata.draw_platform(c.display)
+
+    rings_group.update(cube, rings_group)
+
+    for ring in rings:  
+        ring.draw(c.display, camera)
 
     for plata in platforms:
         if not plata.hitbox.colliderect(cube.hitbox):
@@ -80,6 +87,8 @@ while c.game_active:
 
     camera.update(cube, cube.look_up, cube.look_down)
     cube.draw_player(c.display)
+    
+    #draw_ring(c.display)
     
     cube.checker_pos()
     display_time(elapsed_time, c.display)
@@ -158,5 +167,6 @@ while c.game_active:
 
 
     pg.display.flip()
+
     c.clock.tick(60)
 pg.quit()

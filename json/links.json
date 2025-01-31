@@ -19,6 +19,10 @@
 
     },
 
+    "Object_sprites": {
+        "ring": "/sprites/ring.gif"
+    },
+
     "Fonts": {
         "main": "/font/soniclogo_jp.ttf"
     }

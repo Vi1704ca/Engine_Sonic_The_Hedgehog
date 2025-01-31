@@ -39,6 +39,7 @@ def draw_obj(screen):
         Text(f"Score: {score}", (10, 20)),
         Text(f"Time: {time_value}", (10, 100)),
         Text(f"Speed: {int(cube.speed)}", (10, 180)),
+        Text(f"Rings: {cube.rings}", (10, 260)),
         Text(f"FPS: {fps_text}", (WIDGHT_FULL - 250, 20))
     ]
 

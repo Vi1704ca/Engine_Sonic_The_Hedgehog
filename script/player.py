@@ -33,6 +33,8 @@ class Player(pg.sprite.Sprite):
         self.count_run_walk = 0
         self.run_lost_speed = False
 
+        self.rings = 0
+
         self.velocity_x = 0
         self.velocity_y = 0
 

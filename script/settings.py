@@ -27,4 +27,4 @@ FONT_SIZE = 35
 
 score = 0
 time = "0:0"
-rings =0
+rings = 0

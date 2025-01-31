@@ -10,7 +10,6 @@ class Camera:
         self.height = height
 
     def apply(self, rect):
-        
         return rect.move(self.offset_x, self.offset_y)
 
     def update(self, target, look_up, look_down):
