@@ -6,6 +6,7 @@ import pygame as pg
 from player import *
 import random
 from ring import Ring
+from objective import Spike
 
 
 class Platform(Player):
@@ -25,26 +26,40 @@ platforms = []
 def generate_platforms_and_rings():
     platforms = []
     rings_group = pg.sprite.Group()
+    spikes_group = pg.sprite.Group()
+
     current_x = 0
-    for i in range(1000):  # генерируем 1000 платформ
+    for i in range(1000):  
         width = random.randint(500, 1500)
         height = random.randint(300, 500)
         y = random.randint(500, 800)
-        platforms.append(Platform(current_x, y, width, height))
-        current_x += width 
-        
-        # Уменьшаем количество колец: пусть кольца появляются на каждой 3-й платформе
-        if i % 3 == 0 and random.random() < 0.7:  # 70% шанс генерации на выбранной платформе
-            ring_count = random.randint(2, 4)  # От 2 до 4 колец
+        platform = Platform(current_x, y, width, height)
+        platforms.append(platform)
+        current_x += width  
+
+        if i % 3 == 0 and random.random() < 0.7:
+            ring_count = random.randint(2, 4)
+            segment_width = width // ring_count
             for j in range(ring_count):
-                ring_x = current_x + (width // ring_count) * j + (width // (ring_count * 2))
-                ring_y = y - (height // 2) - 100  # Над платформой
+                ring_x = current_x + segment_width * j + segment_width // 2
+                ring_y = y - height // 2 - 100
+                ring_y = max(ring_y, y - height - 100)  
+
+                rings_group.add(Ring(ring_x, ring_y))
+
+        if i % 6 == 0 and random.random() < 0.8:
+            spike_count = random.randint(3, 5)
+            spike_x_start = platform.hitbox.left + random.randint(20, 50)
+            spike_spacing = cube.SIZE_S + 10
+
+            for j in range(spike_count):
+                spike_x = spike_x_start + j * spike_spacing
+                if spike_x + cube.SIZE_S > platform.hitbox.right:
+                    break 
                 
-                # Проверка, чтобы кольцо не было в платформе
-                if ring_y >= y:
-                    ring_y = y - height - 100
-                
-                ring = Ring(ring_x, ring_y)
-                rings_group.add(ring)
-    
-    return platforms, rings_group
+                spike_y = platform.hitbox.top - cube.SIZE_S
+                spikes_group.add(Spike(spike_x, spike_y))
+
+    return platforms, rings_group, spikes_group
+
+

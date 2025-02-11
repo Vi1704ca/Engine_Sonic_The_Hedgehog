@@ -25,64 +25,71 @@ class Player(pg.sprite.Sprite):
         self.speed_defualt = speed_defualt
         self.SIZE_S = 65
         self.hitbox = pg.Rect(self.x, self.y, self.SIZE_S, self.SIZE_S)
-        self.go_jump = False
-        self.look_down = False
-        self.look_up = False
-        self.go_LEFT = False
-        self.go_RIGHT = False
-        self.count_run_walk = 0
+        
+        #? Speed Settings:
+        self.brake = False
         self.run_lost_speed = False
-
-        self.rings = 0
-
+        self.touch_R_key = False
+        self.touch_L_key = False
         self.velocity_x = 0
         self.velocity_y = 0
 
-        self.touch_R_key = False
-        self.touch_L_key = False
-        self.brake = False
+        #& States of motion:
+        self.go_jump = False
+        self.go_LEFT = False
+        self.go_RIGHT = False
+        self.look_down = False
+        self.look_up = False
+        self.left_side, self.right_side = False, True
+        self.raise_head, self.lower_head = False, False
         self.count_dontmove = 0
 
-        self.dashing = False 
-        self.dash_cooldown = 0
-        self.dash_delay_ms = 1000  
-        self.dash_speed = 30  
-        self.dash_duration = 20  
-        self.dash_frames_remaining = 0  
-        self.on_Ground = False
+        #TODO Jump Settings:
         self.jump_count = 0
         self.jump_cooldown = 0
         self.jump_delay_ms = 500
-        self.left_side, self.right_side = False, True
-        self.raise_head, self.lower_head = False, False
+        self.on_Ground = False
+        self.in_air = False
+        self.tick_air = 0
 
+        #* Spindash Settings:
+        self.dashing = False
+        self.dash_cooldown = 0
+        self.dash_delay_ms = 1000
+        self.dash_speed = 30
+        self.dash_duration = 20
+        self.dash_frames_remaining = 0
+
+        #~ Animation Settings:
         self.animation_count = 0
         self.current_frame = 0
         self.animation_speed = 5
         self.total_frames = 20
         self.num_frames_to_use = 5
 
+        #! Sprites:
         self.sprites = {
-            "0" : pg.image.load(PATH_D + links["Sprites"]["turn_R"]),
-            "1" : pg.image.load(PATH_D + links["Sprites"]["turn_L"]),
-            "3" : pg.image.load(PATH_D + links["Sprites"]["jump"]),
-            "2" : pg.image.load(PATH_D + links["Sprites"]["look_up_l"]),
-            "4" : pg.image.load(PATH_D + links["Sprites"]["look_down_l"]),
-            "5" : pg.image.load(PATH_D + links["Sprites"]["look_down_r"]),
-            "6" : pg.image.load(PATH_D + links["Sprites"]["look_up_r"]),
-            "7" : pg.image.load(PATH_D + links["Sprites"]["stop_break"]),
-            "8" : pg.image.load(PATH_D + links["Sprites"]["stop_break_L"]),
+            "0": pg.image.load(PATH_D + links["Sprites"]["turn_R"]),
+            "1": pg.image.load(PATH_D + links["Sprites"]["turn_L"]),
+            "2": pg.image.load(PATH_D + links["Sprites"]["look_up_l"]),
+            "3": pg.image.load(PATH_D + links["Sprites"]["jump"]),
+            "4": pg.image.load(PATH_D + links["Sprites"]["look_down_l"]),
+            "5": pg.image.load(PATH_D + links["Sprites"]["look_down_r"]),
+            "6": pg.image.load(PATH_D + links["Sprites"]["look_up_r"]),
+            "7": pg.image.load(PATH_D + links["Sprites"]["stop_break"]),
+            "8": pg.image.load(PATH_D + links["Sprites"]["stop_break_L"]),
         }
 
         self.sprite_animation = {
             "right": pg.image.load(PATH_D + links["Sprites"]["run_R"]),
             "left": pg.image.load(PATH_D + links["Sprites"]["run_L"]),
-            "walk" : pg.image.load(PATH_D + links["Sprites"]["walk_R"]),
-            "walk_l" : pg.image.load(PATH_D + links["Sprites"]["walk_L"]),
-            "idle_animations" : pg.image.load(PATH_D + links["Sprites"]["dont_move_animation"]),
-            "idle_animations_l" : pg.image.load(PATH_D + links["Sprites"]["dont_move_animation_l"]),
+            "walk": pg.image.load(PATH_D + links["Sprites"]["walk_R"]),
+            "walk_l": pg.image.load(PATH_D + links["Sprites"]["walk_L"]),
+            "idle_animations": pg.image.load(PATH_D + links["Sprites"]["dont_move_animation"]),
+            "idle_animations_l": pg.image.load(PATH_D + links["Sprites"]["dont_move_animation_l"]),
         }
 
+        #? Sprite Transformation:
         self.jump = pg.transform.scale(self.sprites["3"], (self.SIZE_S, self.SIZE_S))
         self.turn_l = pg.transform.scale(self.sprites["1"], (self.SIZE_S, self.SIZE_S))
         self.turn_r = pg.transform.scale(self.sprites["0"], (self.SIZE_S, self.SIZE_S))
@@ -93,21 +100,20 @@ class Player(pg.sprite.Sprite):
         self.stop_break = pg.transform.scale(self.sprites["7"], (self.SIZE_S, self.SIZE_S))
         self.stop_break_left = pg.transform.scale(self.sprites["8"], (self.SIZE_S, self.SIZE_S))
 
+        #* Loading animation frames:
         self.run_frames_right = self.load_run_frames(self.sprite_animation["right"], self.total_frames, self.num_frames_to_use)
         self.run_frames_left = self.load_run_frames(self.sprite_animation["left"], self.total_frames, self.num_frames_to_use)
         self.walk_frames_R = self.load_run_frames(self.sprite_animation["walk"], self.total_frames, self.num_frames_to_use)
         self.walk_frames_L = self.load_run_frames(self.sprite_animation["walk_l"], self.total_frames, self.num_frames_to_use)
-        self.idle_frames_R = self.load_run_frames(self.sprite_animation["idle_animations"], self.total_frames, self.num_frames_to_use)        
+        self.idle_frames_R = self.load_run_frames(self.sprite_animation["idle_animations"], self.total_frames, self.num_frames_to_use)
         self.idle_frames_L = self.load_run_frames(self.sprite_animation["idle_animations_l"], self.total_frames, self.num_frames_to_use)
 
+        #& Current frames and sprite:
         self.current_frames = self.run_frames_right
         self.sprite_now = self.current_frames[0]
 
-        self.in_air = False
-        self.tick_air = 0
-        self.animation_count = 0
-        self.current_frame = 0
-        self.animation_speed = 10
+        #~ 
+        self.rings = 0
 
     def load_run_frames(self, spritesheet, total_frames, num_frames_to_use):
         frames = []
@@ -147,6 +153,7 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_DOWN] and (keys[pg.K_a] or keys[pg.K_s]):
             self.dashing = True
             self.start_dash()
+
             
         if self.go_jump and self.on_Ground and not self.dashing:
             if current_time > self.jump_cooldown:
@@ -155,9 +162,11 @@ class Player(pg.sprite.Sprite):
                 self.on_Ground = False
                 self.sprite_now = self.jump
 
+
         if self.jump_count > 0:
             self.hitbox.y -= self.speed_defualt + 35
             self.jump_count -= 1
+
 
         if self.dashing and self.dash_frames_remaining > 0 and self.speed <= 0:
             if self.left_side:
@@ -172,7 +181,17 @@ class Player(pg.sprite.Sprite):
         else:
             self.dashing = False
 
-        if not self.dashing and (not self.lower_head or not self.raise_head) and self.count_dontmove < 35:
+
+        if self.speed <= 0:
+            if not self.dashing and not self.raise_head and not self.lower_head and self.on_Ground and self.count_dontmove < 35 and not self.in_air:
+                self.update_animation()
+                if self.right_side:
+                    self.sprite_now = self.turn_r
+                elif self.left_side:
+                    self.sprite_now = self.turn_l
+
+
+        elif not self.dashing and (not self.lower_head or not self.raise_head) and self.count_dontmove < 35:
             if self.go_LEFT:
                 self.hitbox.x -= self.speed
                 self.left_side, self.right_side = True, False
@@ -208,6 +227,7 @@ class Player(pg.sprite.Sprite):
         if self.in_air == True:
             self.sprite_now = self.jump
 
+
         if not self.dashing and self.speed <= 0 and self.on_Ground:
             if self.lower_head == True:
                 if self.right_side:
@@ -234,8 +254,9 @@ class Player(pg.sprite.Sprite):
                 self.left_side = True
                 self.right_side = False
 
+
         elif self.speed > 0 and not self.touch_L_key and not self.touch_R_key:
-            self.speed -= 0.05
+            self.speed -= 0.02
             if not self.dashing and self.on_Ground:
                 if self.right_side:
                     self.go_RIGHT = True
@@ -244,18 +265,12 @@ class Player(pg.sprite.Sprite):
                     self.go_LEFT = True
                     self.go_RIGHT = False
 
-        if self.speed <= 0:
-            if not self.dashing and not self.raise_head and not self.lower_head and self.on_Ground and self.count_dontmove < 35:
-                if self.right_side:
-                    self.sprite_now = self.turn_r
-                elif self.left_side:
-                    self.sprite_now = self.turn_l
-
             
         if self.speed <= 0 and not self.dashing and not self.raise_head and not self.lower_head:
             self.count_dontmove = min(self.count_dontmove + 0.01, 35)  
         else:
             self.count_dontmove = 0
+            
 
         if self.count_dontmove >= 35 and self.on_Ground:
             self.update_animation()
@@ -279,7 +294,7 @@ class Player(pg.sprite.Sprite):
             self.hitbox.y = 500
 
 
-        self.hitbox.x = max(0, min(102000 - self.hitbox.width, self.hitbox.x))
+        self.hitbox.x = max(0, min(4000000 - self.hitbox.width, self.hitbox.x))
         self.hitbox.y = max(0, self.hitbox.y)
 
 

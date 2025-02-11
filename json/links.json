@@ -20,7 +20,8 @@
     },
 
     "Object_sprites": {
-        "ring": "/sprites/ring.gif"
+        "ring": "/sprites/ring.gif",
+        "spikes": "/sprites/spikes.png"
     },
 
     "Fonts": {

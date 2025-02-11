@@ -24,7 +24,7 @@ class Config():
 
 c = Config()
 
-platforms, rings = generate_platforms_and_rings()
+platforms, rings, spikes_group = generate_platforms_and_rings()
 rings_group.add(rings)
 
 gravity = False
@@ -40,6 +40,12 @@ while c.game_active:
 
     for ring in rings:  
         ring.draw(c.display, camera)
+
+    spikes_group.update()
+    
+    for spike in spikes_group:
+        spike.draw_spike(c.display)
+
 
     for plata in platforms:
         if not plata.hitbox.colliderect(cube.hitbox):

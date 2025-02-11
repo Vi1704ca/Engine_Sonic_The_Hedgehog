@@ -20,7 +20,7 @@ frames = [
 
 frame_index = 0
 frame_counter = 0  
-animation_speed = 45
+animation_speed = 40
 
 
 
