@@ -12,7 +12,6 @@ from camera import *
 import json as js
 from settings import PATH_D
 
-
 with open(PATH_D + "/json/links.json", "r") as file:
        links = js.load(file)
 
@@ -78,6 +77,7 @@ class Player(pg.sprite.Sprite):
             "6": pg.image.load(PATH_D + links["Sprites"]["look_up_r"]),
             "7": pg.image.load(PATH_D + links["Sprites"]["stop_break"]),
             "8": pg.image.load(PATH_D + links["Sprites"]["stop_break_L"]),
+            "9": pg.image.load(PATH_D + links["Sprites"]["sonic_died"]),
         }
 
         self.sprite_animation = {
@@ -99,6 +99,7 @@ class Player(pg.sprite.Sprite):
         self.l_down_R = pg.transform.scale(self.sprites["5"], (self.SIZE_S, self.SIZE_S))
         self.stop_break = pg.transform.scale(self.sprites["7"], (self.SIZE_S, self.SIZE_S))
         self.stop_break_left = pg.transform.scale(self.sprites["8"], (self.SIZE_S, self.SIZE_S))
+        self.died = pg.transform.scale(self.sprites["9"], (self.SIZE_S, self.SIZE_S))
 
         #* Loading animation frames:
         self.run_frames_right = self.load_run_frames(self.sprite_animation["right"], self.total_frames, self.num_frames_to_use)
@@ -114,6 +115,9 @@ class Player(pg.sprite.Sprite):
 
         #~ 
         self.rings = 0
+        self.lives = 3
+        self.loss = False
+        self.restart_game = False
 
     def load_run_frames(self, spritesheet, total_frames, num_frames_to_use):
         frames = []
@@ -224,7 +228,7 @@ class Player(pg.sprite.Sprite):
             #   elif self.left_side:
             #       self.sprite_now = self.turn_l
 
-        if self.in_air == True:
+        if self.in_air == True and cube.loss == False and cube.lives > 0:
             self.sprite_now = self.jump
 
 
@@ -289,9 +293,31 @@ class Player(pg.sprite.Sprite):
                     self.sprite_now = self.stop_break
 
 
-        if self.hitbox.y >= 1200:   
+        #if self.hitbox.y >= 1200:   
+        #    self.hitbox.x = 500
+        #    self.hitbox.y = 500
+
+        if self.lives <= 0:  
+            self.sprite_now = self.died 
+            camera.distance_h_camera = 0
+            self.go_RIGHT, self.go_LEFT, self.go_jump, self.dashing = False, False, False, False
+        elif self.loss and cube.lives > 0:
+            self.sprite_now = self.died
+            self.hitbox.x = 500
+            self.hitbox.y = 500   
+            self.loss = False   
+            self.lives -= 1  
+
+        if self.restart_game == True:
+            self.rings = 0
             self.hitbox.x = 500
             self.hitbox.y = 500
+            self.lives = 3
+            self.loss = False
+
+        if self.lives <= 3 and self.lives > 0:
+            self.restart_game = False
+            camera.distance_h_camera = 800
 
 
         self.hitbox.x = max(0, min(4000000 - self.hitbox.width, self.hitbox.x))

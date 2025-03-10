@@ -37,15 +37,21 @@ def generate_platforms_and_rings():
         platforms.append(platform)
         current_x += width  
 
-        if i % 3 == 0 and random.random() < 0.7:
-            ring_count = random.randint(2, 4)
-            segment_width = width // ring_count
-            for j in range(ring_count):
-                ring_x = current_x + segment_width * j + segment_width // 2
-                ring_y = y - height // 2 - 100
-                ring_y = max(ring_y, y - height - 100)  
 
+        if i % 3 == 0 and random.random() < 0.7:
+            ring_spacing = 50  
+            ring_width = 30  
+            ring_y = y - height // 2 + 20  
+            ring_count = min((width // (ring_width + ring_spacing)), 4) 
+            ring_count = max(ring_count, 2)  
+
+            total_rings_width = ring_count * ring_width + (ring_count - 1) * ring_spacing
+            start_x = current_x - width + (width - total_rings_width) // 2
+
+            for j in range(ring_count):
+                ring_x = start_x + j * (ring_width + ring_spacing)
                 rings_group.add(Ring(ring_x, ring_y))
+
 
         if i % 6 == 0 and random.random() < 0.8:
             spike_count = random.randint(3, 5)
@@ -61,5 +67,3 @@ def generate_platforms_and_rings():
                 spikes_group.add(Spike(spike_x, spike_y))
 
     return platforms, rings_group, spikes_group
-
-

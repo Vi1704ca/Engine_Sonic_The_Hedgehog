@@ -15,7 +15,8 @@
         "stop_break": "/sonic/break.png",
         "stop_break_L": "/sonic/break_left.png",
         "dont_move_animation": "/sonic/dontmove.png",
-        "dont_move_animation_l": "/sonic/dontmove_LEFT.png"
+        "dont_move_animation_l": "/sonic/dontmove_LEFT.png",
+        "sonic_died": "/sonic/died.png"
 
     },
 
@@ -25,6 +26,11 @@
     },
 
     "Fonts": {
-        "main": "/font/soniclogo_jp.ttf"
+        "main": "/font/soniclogo_jp.ttf",
+        "game": "/font/mania.ttf"
+    },
+
+    "Icons": {
+        "sonic_lives": "/sonic/icon.png"
     }
 }

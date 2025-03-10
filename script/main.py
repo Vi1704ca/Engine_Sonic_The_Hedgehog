@@ -14,18 +14,25 @@ class Config():
     def __init__(self):
         self.clock = pg.time.Clock()
         self.camera_group = pg.sprite.Sprite()
-        self.display = pg.display.set_mode((WIDGHT_FULL, HEIGHT_FULL), pg.SCALED)
+        self.display = pg.display.set_mode((WIDGHT_FULL, HEIGHT_FULL), pg.RESIZABLE)
         self.directory = os.path.dirname(__file__) 
         self.path_d = os.path.abspath(os.path.join(self.directory, os.pardir))
         self.game_active = True 
         self.title_w = pg.display.set_caption("Sonic Engine")    
         self.start_time = time.time()      
-        self.full_screen = False  
 
 c = Config()
 
 platforms, rings, spikes_group = generate_platforms_and_rings()
 rings_group.add(rings)
+
+def restart_game():
+    print("Restarting game...")
+    cube.restart_game = True
+
+def return_to_main_menu():
+    c.game_active = False
+
 
 gravity = False
 
@@ -47,42 +54,43 @@ while c.game_active:
         spike.draw_spike(c.display)
 
 
-    for plata in platforms:
-        if not plata.hitbox.colliderect(cube.hitbox):
-            cube.on_Ground = False
+    if cube.lives > 0:
+        for plata in platforms:
+            if not plata.hitbox.colliderect(cube.hitbox):
+                cube.on_Ground = False
 
-    for plata in platforms:
-        if plata.hitbox.colliderect(cube.hitbox):
-            cube.on_Ground = True
-            cube.tick_air = 0
-            cube.in_air = False
+        for plata in platforms:
+            if plata.hitbox.colliderect(cube.hitbox):
+                cube.on_Ground = True
+                cube.tick_air = 0
+                cube.in_air = False
 
-            if cube.hitbox.right >= plata.hitbox.left and cube.hitbox.left < plata.hitbox.left:
-                cube.hitbox.right = plata.hitbox.left
-                cube.velocity_x = 0  
-            if cube.hitbox.left <= plata.hitbox.right and cube.hitbox.right > plata.hitbox.right:
-                cube.hitbox.left = plata.hitbox.right
-                cube.velocity_x = 0
-            if cube.hitbox.bottom >= plata.hitbox.top and cube.hitbox.top < plata.hitbox.top:
-                cube.hitbox.bottom = plata.hitbox.top
-                cube.velocity_y = 0  
-                cube.on_Ground = True  
-            if cube.hitbox.top <= plata.hitbox.bottom and cube.hitbox.bottom > plata.hitbox.bottom:
-                cube.hitbox.top = plata.hitbox.bottom
-                cube.velocity_y = 0 
+                if cube.hitbox.right >= plata.hitbox.left and cube.hitbox.left < plata.hitbox.left:
+                    cube.hitbox.right = plata.hitbox.left
+                    cube.velocity_x = 0  
+                if cube.hitbox.left <= plata.hitbox.right and cube.hitbox.right > plata.hitbox.right:
+                    cube.hitbox.left = plata.hitbox.right
+                    cube.velocity_x = 0
+                if cube.hitbox.bottom >= plata.hitbox.top and cube.hitbox.top < plata.hitbox.top:
+                    cube.hitbox.bottom = plata.hitbox.top
+                    cube.velocity_y = 0  
+                    cube.on_Ground = True  
+                if cube.hitbox.top <= plata.hitbox.bottom and cube.hitbox.bottom > plata.hitbox.bottom:
+                    cube.hitbox.top = plata.hitbox.bottom
+                    cube.velocity_y = 0 
             
 
-    steps = int(max(5, abs(cube.velocity_y) // 5))  
-    for step in range(steps):
-        cube.hitbox.y += cube.velocity_y / steps  
-        for plata in platforms:
-            if cube.hitbox.colliderect(plata.hitbox):  
-                cube.hitbox.bottom = plata.hitbox.top  
-                cube.velocity_y = 0
-                cube.on_Ground = True
-                break
+        steps = int(max(5, abs(cube.velocity_y) // 5))  
+        for step in range(steps):
+            cube.hitbox.y += cube.velocity_y / steps  
+            for plata in platforms:
+                if cube.hitbox.colliderect(plata.hitbox):  
+                    cube.hitbox.bottom = plata.hitbox.top  
+                    cube.velocity_y = 0
+                    cube.on_Ground = True
+                    break
 
-    if not cube.on_Ground:
+    if not cube.on_Ground or cube.lives == 0:
         cube.tick_air += 1
         if cube.tick_air >= 3:
             cube.in_air = True
@@ -94,7 +102,7 @@ while c.game_active:
     camera.update(cube, cube.look_up, cube.look_down)
     cube.draw_player(c.display)
     
-    #draw_ring(c.display)
+    lives_sonic.draw_icon(c.display)
     
     cube.checker_pos()
     display_time(elapsed_time, c.display)
@@ -105,6 +113,14 @@ while c.game_active:
     for i in pg.event.get():
         if i.type == pg.QUIT:
              c.game_active = False
+
+        if i.type == pygame.MOUSEBUTTONDOWN:
+            restart_text, main_menu_text = draw_obj(c.display)
+            mouse_pos = pygame.mouse.get_pos()
+            if restart_text is not None and restart_text.rect.collidepoint(mouse_pos):
+                restart_game()
+            elif main_menu_text is not None and main_menu_text.rect.collidepoint(mouse_pos):
+                return_to_main_menu()
         
         if i.type == pg.KEYUP:
             if i.key == pg.K_ESCAPE:
@@ -137,8 +153,7 @@ while c.game_active:
             if i.key == pg.K_x:
                 cube.brake = 0
             
-
-
+    
         if i.type == pg.KEYDOWN:
             if (i.key == pg.K_a or i.key == pg.K_s) and not cube.dashing:
                 cube.go_jump = 1
@@ -159,20 +174,18 @@ while c.game_active:
             if i.key == pg.K_x:
                 cube.brake = 1
 
-    if key_up_start_time is not None and cube.dashing == False and cube.speed <= 0:
-        elapsed_time = (pg.time.get_ticks() - key_up_start_time) / 1000  
-        if elapsed_time >= key_up_duration and not key_held_for_duration:
-            key_held_for_duration = True 
-            cube.look_up = 1
+    def check_key_hold(key_start_time, key_duration, cube, look_up_or_down):
+        if key_start_time is not None and not cube.dashing and cube.speed <= 0:
+            elapsed_time = (pg.time.get_ticks() - key_start_time) / 1000
+            if elapsed_time >= key_duration and not getattr(cube, f'{look_up_or_down}_held', False):
+                setattr(cube, f'{look_up_or_down}_held', True)
+                setattr(cube, look_up_or_down, 1)
 
-    elif key_down_start_time is not None and cube.dashing == False and cube.speed <= 0:
-        elapsed_time = (pg.time.get_ticks() - key_down_start_time) / 1000  
-        if elapsed_time >= key_down_duration and not key_held_for_duration:
-            key_held_for_duration = True 
-            cube.look_down = 1
+    check_key_hold(key_up_start_time, key_up_duration, cube, 'look_up')
+    check_key_hold(key_down_start_time, key_down_duration, cube, 'look_down')
 
 
     pg.display.flip()
-
+    
     c.clock.tick(60)
 pg.quit()
